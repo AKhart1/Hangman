@@ -1,52 +1,51 @@
-# PART 1
-# display a menu with at least 3 difficulty choices and ask the user
-# to select the desired level
-difficulty = "1" # sample data, normally the user should choose the difficulty
+from hangman_function import *
+def play_hangman():
+    greeting()
 
+    difficulty_choice = input("Enter the number: ")
 
-# STEP 2
-# based on the chosen difficulty level, set the values
-# for the player's lives
-word_to_guess = "Cairo" # sample data, normally the word should be chosen from the countries-and-capitals.txt
-lives = 5 # sample data, normally the lives should be chosen based on the difficulty
+    if difficulty_choice not in ("1", "2", "3"):
+        print("Invalid difficulty. Exiting.")
+        return
 
+    lives = {"1": 7, "2": 5, "3": 3}[difficulty_choice]
 
-# STEP 3
-# display the chosen word to guess with all letters replaced by "_"
-# for example instead of "Cairo" display "_ _ _ _ _"
+    words = get_words('countries-and-capitals.txt', difficulty_choice)
+    word_to_guess = choose_word(words)
+    already_tried_letters = []
+    current_game_state = initialize_game_state(word_to_guess)
 
+    while True:
+        print(display_game_status(current_game_state))
+        print(display_hangman(lives))
 
-# STEP 4
-# ask the user to type a letter
-# here you should validate if the typed letter is the word
-# "quit", "Quit", "QUit", "QUIt", "QUIT", "QuIT"... you get the idea :)
-# HINT: use the upper() or lower() built-in Python functions
+        guess = input("Enter a letter or type 'quit' to exit: ").lower()
 
+        if guess == 'quit':
+            print("Bye!")
+            break
 
-# STEP 5
-# validate if the typed letter is already in the tried letters
-# HINT: search on the internet: `python if letter in list`
-# If it is not, than append to the tried letters
-# If it has already been typed, return to STEP 5. HINT: use a while loop here
-already_tried_letters = [] # this list will contain all the tried letters
+        while guess in already_tried_letters:
+            print("You already guessed that letter. Try again.")
+            guess = input("Enter a letter or type 'quit' to exit: ").lower()
 
+        already_tried_letters.append(guess)
 
-# STEP 6
-# if the letter is present in the word iterate through all the letters in the variable
-# word_to_guess. If that letter is present in the already_tried_letters then display it,
-# otherwise display "_".
+        if is_guess_correct(word_to_guess, guess):
+            current_game_state = update_game_state(word_to_guess, current_game_state, guess)
+        else:
+            lives -= 1
+            print("Incorrect guess. Try again.")
+            if lives == 0:
+                print("Game over. The word was:", word_to_guess)
+                break
 
+        if '_' not in current_game_state:
+            print("Congratulations! You guessed the word:", word_to_guess)
+            break
+        elif lives == 0:
+            print("Game over. The word was:", word_to_guess)
+            break
 
-# if the letter is not present in the word decrease the value in the lives variable
-# and display a hangman ASCII art. You can search the Internet for "hangman ASCII art",
-# or draw a new beautiful one on your own.
-
-
-
-# STEP 7
-# check if the variable already_tried_letters already contains all the letters necessary
-# to build the value in the variable word_to_guess. If so display a winning message and exit
-# the app.
-# If you still have letters that are not guessed check if you have a non negative amount of lives
-# left. If not print a loosing message and exit the app.
-# If neither of the 2 conditions mentioned above go back to STEP 4
+if __name__ == "__main__":
+    play_hangman()
